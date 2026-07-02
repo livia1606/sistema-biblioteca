@@ -12,6 +12,8 @@ const loanRoutes = require("./routes/loanRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger/swagger");
 
+const userRoutes = require("./routes/userRoutes");
+
 const app = express();
 
 app.use(cors());
@@ -26,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/livros", bookRoutes);
 app.use("/api/leitores", readerRoutes);
 app.use("/api/emprestimos", loanRoutes);
+app.use("/api/usuarios", userRoutes);
 
 app.use(
   "/api-docs",
