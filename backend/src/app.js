@@ -16,6 +16,12 @@ const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
+console.log("authRoutes:", typeof authRoutes);
+console.log("bookRoutes:", typeof bookRoutes);
+console.log("readerRoutes:", typeof readerRoutes);
+console.log("loanRoutes:", typeof loanRoutes);
+console.log("userRoutes:", typeof userRoutes);
+
 app.use(cors());
 app.use(express.json());
 app.get("/", (req, res) => {

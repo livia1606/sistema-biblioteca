@@ -58,7 +58,68 @@ const cadastrarUsuario = async (req, res) => {
   }
 };
 
+// Editar usuário
+const editarUsuario = async (req, res) => {
+  try {
+    const usuario = await User.findByPk(req.params.id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensagem: "Usuário não encontrado.",
+      });
+    }
+
+    const dados = {
+      nome: req.body.nome,
+      email: req.body.email,
+      perfil: req.body.perfil,
+    };
+
+    if (req.body.senha && req.body.senha.trim() !== "") {
+      dados.senha = await bcrypt.hash(req.body.senha, 10);
+    }
+
+    await usuario.update(dados);
+
+    res.status(200).json({
+      mensagem: "Usuário atualizado com sucesso!",
+      usuario,
+    });
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: "Erro ao atualizar usuário.",
+      erro: erro.message,
+    });
+  }
+};
+
+// Excluir usuário
+const excluirUsuario = async (req, res) => {
+  try {
+    const usuario = await User.findByPk(req.params.id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensagem: "Usuário não encontrado.",
+      });
+    }
+
+    await usuario.destroy();
+
+    res.status(200).json({
+      mensagem: "Usuário excluído com sucesso!",
+    });
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: "Erro ao excluir usuário.",
+      erro: erro.message,
+    });
+  }
+};
+
 module.exports = {
   listarUsuarios,
   cadastrarUsuario,
+  editarUsuario,
+  excluirUsuario,
 };

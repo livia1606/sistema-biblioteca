@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import api from "../services/api";
 
 function Leitores() {
   const [leitores, setLeitores] = useState([]);
@@ -8,72 +9,92 @@ function Leitores() {
 
   const [form, setForm] = useState({
     nome: "",
-    cpfRa: "",
+    cpf: "",
     email: "",
     telefone: "",
     endereco: "",
     status: "Ativo",
   });
 
+  useEffect(() => {
+    carregarLeitores();
+  }, []);
+
+  const carregarLeitores = async () => {
+    try {
+      const resposta = await api.get("/leitores");
+      setLeitores(resposta.data);
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao carregar leitores.");
+    }
+  };
+
   const alterarCampo = (e) => {
     const { name, value } = e.target;
-
-    setForm({
-      ...form,
-      [name]: value,
-    });
+    setForm({ ...form, [name]: value });
   };
 
   const limparFormulario = () => {
     setForm({
       nome: "",
-      cpfRa: "",
+      cpf: "",
       email: "",
       telefone: "",
       endereco: "",
       status: "Ativo",
     });
-
     setEditandoId(null);
   };
 
-  const salvarLeitor = (e) => {
+  const salvarLeitor = async (e) => {
     e.preventDefault();
 
-    if (!form.nome || !form.cpfRa || !form.email) {
-      alert("Preencha pelo menos nome, CPF/RA e e-mail.");
+    if (!form.nome || !form.cpf || !form.email) {
+      alert("Preencha pelo menos nome, CPF e e-mail.");
       return;
     }
 
-    if (editandoId) {
-      const atualizados = leitores.map((leitor) =>
-        leitor.id === editandoId ? { ...form, id: editandoId } : leitor
-      );
+    try {
+      if (editandoId) {
+        await api.put(`/leitores/${editandoId}`, form);
+        alert("Leitor atualizado com sucesso!");
+      } else {
+        await api.post("/leitores", form);
+        alert("Leitor cadastrado com sucesso!");
+      }
 
-      setLeitores(atualizados);
       limparFormulario();
-      return;
+      carregarLeitores();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao salvar leitor.");
     }
-
-    const novoLeitor = {
-      ...form,
-      id: Date.now(),
-    };
-
-    setLeitores([...leitores, novoLeitor]);
-    limparFormulario();
   };
 
   const editarLeitor = (leitor) => {
-    setForm(leitor);
     setEditandoId(leitor.id);
+
+    setForm({
+      nome: leitor.nome || "",
+      cpf: leitor.cpf || "",
+      email: leitor.email || "",
+      telefone: leitor.telefone || "",
+      endereco: leitor.endereco || "",
+      status: leitor.status || "Ativo",
+    });
   };
 
-  const excluirLeitor = (id) => {
-    const confirmar = confirm("Deseja realmente excluir este leitor?");
+  const excluirLeitor = async (id) => {
+    if (!window.confirm("Deseja realmente excluir este leitor?")) return;
 
-    if (confirmar) {
-      setLeitores(leitores.filter((leitor) => leitor.id !== id));
+    try {
+      await api.delete(`/leitores/${id}`);
+      alert("Leitor removido com sucesso!");
+      carregarLeitores();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao excluir leitor.");
     }
   };
 
@@ -81,10 +102,10 @@ function Leitores() {
     const termo = busca.toLowerCase();
 
     return (
-      leitor.nome.toLowerCase().includes(termo) ||
-      leitor.cpfRa.toLowerCase().includes(termo) ||
-      leitor.email.toLowerCase().includes(termo) ||
-      leitor.status.toLowerCase().includes(termo)
+      leitor.nome?.toLowerCase().includes(termo) ||
+      leitor.cpf?.toLowerCase().includes(termo) ||
+      leitor.email?.toLowerCase().includes(termo) ||
+      leitor.status?.toLowerCase().includes(termo)
     );
   });
 
@@ -93,7 +114,7 @@ function Leitores() {
       <div className="page-header">
         <p className="page-kicker">Gerenciamento</p>
         <h1>Leitores</h1>
-        <span>Cadastre, edite, exclua e busque leitores da biblioteca.</span>
+        <span>Cadastre, edite, exclua e consulte leitores.</span>
       </div>
 
       <div className="crud-card">
@@ -105,40 +126,11 @@ function Leitores() {
         </div>
 
         <form className="crud-form" onSubmit={salvarLeitor}>
-          <input
-            name="nome"
-            placeholder="Nome"
-            value={form.nome}
-            onChange={alterarCampo}
-          />
-
-          <input
-            name="cpfRa"
-            placeholder="CPF ou RA"
-            value={form.cpfRa}
-            onChange={alterarCampo}
-          />
-
-          <input
-            name="email"
-            placeholder="E-mail"
-            value={form.email}
-            onChange={alterarCampo}
-          />
-
-          <input
-            name="telefone"
-            placeholder="Telefone"
-            value={form.telefone}
-            onChange={alterarCampo}
-          />
-
-          <input
-            name="endereco"
-            placeholder="Endereço"
-            value={form.endereco}
-            onChange={alterarCampo}
-          />
+          <input name="nome" placeholder="Nome" value={form.nome} onChange={alterarCampo} required />
+          <input name="cpf" placeholder="CPF" value={form.cpf} onChange={alterarCampo} required />
+          <input name="email" placeholder="E-mail" value={form.email} onChange={alterarCampo} required />
+          <input name="telefone" placeholder="Telefone" value={form.telefone} onChange={alterarCampo} />
+          <input name="endereco" placeholder="Endereço" value={form.endereco} onChange={alterarCampo} />
 
           <select name="status" value={form.status} onChange={alterarCampo}>
             <option value="Ativo">Ativo</option>
@@ -151,11 +143,7 @@ function Leitores() {
             </button>
 
             {editandoId && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={limparFormulario}
-              >
+              <button type="button" className="btn-secondary" onClick={limparFormulario}>
                 Cancelar
               </button>
             )}
@@ -167,13 +155,13 @@ function Leitores() {
         <div className="crud-card-header">
           <div>
             <h2>Lista de Leitores</h2>
-            <p>Consulte os leitores cadastrados no sistema.</p>
+            <p>Leitores cadastrados no sistema.</p>
           </div>
 
           <div className="search-box">
             <FaSearch />
             <input
-              placeholder="Buscar por nome, CPF/RA, e-mail ou status"
+              placeholder="Buscar por nome, CPF, e-mail ou status"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
@@ -185,9 +173,10 @@ function Leitores() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>CPF/RA</th>
+                <th>CPF</th>
                 <th>E-mail</th>
                 <th>Telefone</th>
+                <th>Endereço</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -196,7 +185,7 @@ function Leitores() {
             <tbody>
               {leitoresFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="empty-table">
+                  <td colSpan="7" className="empty-table">
                     Nenhum leitor cadastrado.
                   </td>
                 </tr>
@@ -204,9 +193,10 @@ function Leitores() {
                 leitoresFiltrados.map((leitor) => (
                   <tr key={leitor.id}>
                     <td>{leitor.nome}</td>
-                    <td>{leitor.cpfRa}</td>
+                    <td>{leitor.cpf}</td>
                     <td>{leitor.email}</td>
                     <td>{leitor.telefone}</td>
+                    <td>{leitor.endereco}</td>
                     <td>
                       <span className="status-badge">{leitor.status}</span>
                     </td>

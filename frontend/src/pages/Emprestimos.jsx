@@ -1,107 +1,103 @@
-import { useState } from "react";
-import { FaCheck, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaCheck, FaSearch } from "react-icons/fa";
+import api from "../services/api";
 
 function Emprestimos() {
   const [emprestimos, setEmprestimos] = useState([]);
+  const [livros, setLivros] = useState([]);
+  const [leitores, setLeitores] = useState([]);
   const [busca, setBusca] = useState("");
-  const [editandoId, setEditandoId] = useState(null);
 
   const [form, setForm] = useState({
-    leitor: "",
-    livro: "",
+    readerId: "",
+    bookId: "",
     dataEmprestimo: "",
-    dataPrevista: "",
-    dataDevolucao: "",
-    status: "Em aberto",
+    dataPrevistaDevolucao: "",
   });
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
+    try {
+      const [resEmprestimos, resLivros, resLeitores] = await Promise.all([
+        api.get("/emprestimos"),
+        api.get("/livros"),
+        api.get("/leitores"),
+      ]);
+
+      setEmprestimos(resEmprestimos.data);
+      setLivros(resLivros.data);
+      setLeitores(resLeitores.data);
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao carregar dados.");
+    }
+  };
 
   const alterarCampo = (e) => {
     const { name, value } = e.target;
-
-    setForm({
-      ...form,
-      [name]: value,
-    });
+    setForm({ ...form, [name]: value });
   };
 
   const limparFormulario = () => {
     setForm({
-      leitor: "",
-      livro: "",
+      readerId: "",
+      bookId: "",
       dataEmprestimo: "",
-      dataPrevista: "",
-      dataDevolucao: "",
-      status: "Em aberto",
+      dataPrevistaDevolucao: "",
     });
-
-    setEditandoId(null);
   };
 
-  const salvarEmprestimo = (e) => {
+  const salvarEmprestimo = async (e) => {
     e.preventDefault();
 
-    if (!form.leitor || !form.livro || !form.dataEmprestimo || !form.dataPrevista) {
-      alert("Preencha leitor, livro, data do empréstimo e data prevista.");
+    if (!form.readerId || !form.bookId || !form.dataEmprestimo || !form.dataPrevistaDevolucao) {
+      alert("Preencha todos os campos.");
       return;
     }
 
-    if (editandoId) {
-      const atualizados = emprestimos.map((emprestimo) =>
-        emprestimo.id === editandoId ? { ...form, id: editandoId } : emprestimo
-      );
+    try {
+      await api.post("/emprestimos", {
+        readerId: Number(form.readerId),
+        bookId: Number(form.bookId),
+        dataEmprestimo: form.dataEmprestimo,
+        dataPrevistaDevolucao: form.dataPrevistaDevolucao,
+      });
 
-      setEmprestimos(atualizados);
+      alert("Empréstimo registrado com sucesso!");
       limparFormulario();
-      return;
-    }
-
-    const novoEmprestimo = {
-      ...form,
-      id: Date.now(),
-    };
-
-    setEmprestimos([...emprestimos, novoEmprestimo]);
-    limparFormulario();
-  };
-
-  const editarEmprestimo = (emprestimo) => {
-    setForm(emprestimo);
-    setEditandoId(emprestimo.id);
-  };
-
-  const excluirEmprestimo = (id) => {
-    const confirmar = confirm("Deseja realmente excluir este empréstimo?");
-
-    if (confirmar) {
-      setEmprestimos(emprestimos.filter((emprestimo) => emprestimo.id !== id));
+      carregarDados();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao registrar empréstimo.");
     }
   };
 
-  const registrarDevolucao = (id) => {
-    const hoje = new Date().toISOString().split("T")[0];
+  const registrarDevolucao = async (id) => {
+    try {
+      await api.put(`/emprestimos/${id}/devolucao`);
+      alert("Devolução registrada com sucesso!");
+      carregarDados();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao registrar devolução.");
+    }
+  };
 
-    const atualizados = emprestimos.map((emprestimo) =>
-      emprestimo.id === id
-        ? {
-            ...emprestimo,
-            dataDevolucao: hoje,
-            status: "Devolvido",
-          }
-        : emprestimo
-    );
-
-    setEmprestimos(atualizados);
+  const formatarData = (data) => {
+    if (!data) return "-";
+    return data.split("T")[0];
   };
 
   const emprestimosFiltrados = emprestimos.filter((emprestimo) => {
     const termo = busca.toLowerCase();
 
     return (
-      emprestimo.leitor.toLowerCase().includes(termo) ||
-      emprestimo.livro.toLowerCase().includes(termo) ||
-      emprestimo.status.toLowerCase().includes(termo) ||
-      emprestimo.dataEmprestimo.toLowerCase().includes(termo) ||
-      emprestimo.dataPrevista.toLowerCase().includes(termo)
+      emprestimo.Reader?.nome?.toLowerCase().includes(termo) ||
+      emprestimo.Book?.titulo?.toLowerCase().includes(termo) ||
+      emprestimo.status?.toLowerCase().includes(termo)
     );
   });
 
@@ -110,75 +106,54 @@ function Emprestimos() {
       <div className="page-header">
         <p className="page-kicker">Gerenciamento</p>
         <h1>Empréstimos</h1>
-        <span>
-          Registre empréstimos, acompanhe prazos e controle devoluções.
-        </span>
+        <span>Registre empréstimos e controle devoluções.</span>
       </div>
 
       <div className="crud-card">
         <div className="crud-card-header">
           <div>
-            <h2>{editandoId ? "Editar Empréstimo" : "Registrar Empréstimo"}</h2>
-            <p>Associe um leitor a um livro e informe os prazos.</p>
+            <h2>Registrar Empréstimo</h2>
+            <p>Associe um leitor a um livro.</p>
           </div>
         </div>
 
         <form className="crud-form" onSubmit={salvarEmprestimo}>
-          <input
-            name="leitor"
-            placeholder="Leitor"
-            value={form.leitor}
-            onChange={alterarCampo}
-          />
+          <select name="readerId" value={form.readerId} onChange={alterarCampo} required>
+            <option value="">Selecione o leitor</option>
+            {leitores.map((leitor) => (
+              <option key={leitor.id} value={leitor.id}>
+                {leitor.nome}
+              </option>
+            ))}
+          </select>
 
-          <input
-            name="livro"
-            placeholder="Livro"
-            value={form.livro}
-            onChange={alterarCampo}
-          />
+          <select name="bookId" value={form.bookId} onChange={alterarCampo} required>
+            <option value="">Selecione o livro</option>
+            {livros.map((livro) => (
+              <option key={livro.id} value={livro.id}>
+                {livro.titulo}
+              </option>
+            ))}
+          </select>
 
           <input
             type="date"
             name="dataEmprestimo"
             value={form.dataEmprestimo}
             onChange={alterarCampo}
+            required
           />
 
           <input
             type="date"
-            name="dataPrevista"
-            value={form.dataPrevista}
+            name="dataPrevistaDevolucao"
+            value={form.dataPrevistaDevolucao}
             onChange={alterarCampo}
+            required
           />
-
-          <input
-            type="date"
-            name="dataDevolucao"
-            value={form.dataDevolucao}
-            onChange={alterarCampo}
-          />
-
-          <select name="status" value={form.status} onChange={alterarCampo}>
-            <option value="Em aberto">Em aberto</option>
-            <option value="Devolvido">Devolvido</option>
-            <option value="Atrasado">Atrasado</option>
-          </select>
 
           <div className="crud-actions">
-            <button type="submit">
-              {editandoId ? "Salvar alterações" : "Registrar empréstimo"}
-            </button>
-
-            {editandoId && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={limparFormulario}
-              >
-                Cancelar
-              </button>
-            )}
+            <button type="submit">Registrar empréstimo</button>
           </div>
         </form>
       </div>
@@ -187,13 +162,13 @@ function Emprestimos() {
         <div className="crud-card-header">
           <div>
             <h2>Lista de Empréstimos</h2>
-            <p>Consulte o histórico e registre devoluções.</p>
+            <p>Consulte empréstimos e registre devoluções.</p>
           </div>
 
           <div className="search-box">
             <FaSearch />
             <input
-              placeholder="Buscar por leitor, livro, status ou data"
+              placeholder="Buscar por leitor, livro ou status"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
@@ -224,27 +199,21 @@ function Emprestimos() {
               ) : (
                 emprestimosFiltrados.map((emprestimo) => (
                   <tr key={emprestimo.id}>
-                    <td>{emprestimo.leitor}</td>
-                    <td>{emprestimo.livro}</td>
-                    <td>{emprestimo.dataEmprestimo}</td>
-                    <td>{emprestimo.dataPrevista}</td>
-                    <td>{emprestimo.dataDevolucao || "-"}</td>
+                    <td>{emprestimo.Reader?.nome || "-"}</td>
+                    <td>{emprestimo.Book?.titulo || "-"}</td>
+                    <td>{formatarData(emprestimo.dataEmprestimo)}</td>
+                    <td>{formatarData(emprestimo.dataPrevistaDevolucao)}</td>
+                    <td>{formatarData(emprestimo.dataDevolucao)}</td>
                     <td>
                       <span className="status-badge">{emprestimo.status}</span>
                     </td>
                     <td>
                       <div className="table-actions">
-                        <button onClick={() => registrarDevolucao(emprestimo.id)}>
-                          <FaCheck />
-                        </button>
-
-                        <button onClick={() => editarEmprestimo(emprestimo)}>
-                          <FaEdit />
-                        </button>
-
-                        <button onClick={() => excluirEmprestimo(emprestimo.id)}>
-                          <FaTrash />
-                        </button>
+                        {emprestimo.status !== "DEVOLVIDO" && (
+                          <button onClick={() => registrarDevolucao(emprestimo.id)}>
+                            <FaCheck />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

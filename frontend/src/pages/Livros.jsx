@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import api from "../services/api";
 
 function Livros() {
   const [livros, setLivros] = useState([]);
@@ -15,8 +16,21 @@ function Livros() {
     isbn: "",
     quantidadeTotal: "",
     quantidadeDisponivel: "",
-    status: "Disponível",
   });
+
+  useEffect(() => {
+    carregarLivros();
+  }, []);
+
+  const carregarLivros = async () => {
+    try {
+      const resposta = await api.get("/livros");
+      setLivros(resposta.data);
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao carregar livros.");
+    }
+  };
 
   const alterarCampo = (e) => {
     const { name, value } = e.target;
@@ -37,49 +51,70 @@ function Livros() {
       isbn: "",
       quantidadeTotal: "",
       quantidadeDisponivel: "",
-      status: "Disponível",
     });
 
     setEditandoId(null);
   };
 
-  const salvarLivro = (e) => {
+  const salvarLivro = async (e) => {
     e.preventDefault();
 
-    if (!form.titulo || !form.autor || !form.isbn) {
-      alert("Preencha pelo menos título, autor e ISBN.");
-      return;
-    }
+    try {
+      if (!form.titulo || !form.autor || !form.isbn) {
+        alert("Preencha título, autor e ISBN.");
+        return;
+      }
 
-    if (editandoId) {
-      const atualizados = livros.map((livro) =>
-        livro.id === editandoId ? { ...form, id: editandoId } : livro
-      );
+      const dados = {
+        ...form,
+        anoPublicacao: Number(form.anoPublicacao),
+        quantidadeTotal: Number(form.quantidadeTotal),
+        quantidadeDisponivel: Number(form.quantidadeDisponivel),
+      };
 
-      setLivros(atualizados);
+      if (editandoId) {
+        await api.put(`/livros/${editandoId}`, dados);
+        alert("Livro atualizado com sucesso!");
+      } else {
+        await api.post("/livros", dados);
+        alert("Livro cadastrado com sucesso!");
+      }
+
       limparFormulario();
-      return;
+      carregarLivros();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao salvar livro.");
     }
-
-    const novoLivro = {
-      ...form,
-      id: Date.now(),
-    };
-
-    setLivros([...livros, novoLivro]);
-    limparFormulario();
   };
 
   const editarLivro = (livro) => {
-    setForm(livro);
     setEditandoId(livro.id);
+
+    setForm({
+      titulo: livro.titulo,
+      autor: livro.autor,
+      editora: livro.editora || "",
+      anoPublicacao: livro.anoPublicacao || "",
+      categoria: livro.categoria || "",
+      isbn: livro.isbn || "",
+      quantidadeTotal: livro.quantidadeTotal || "",
+      quantidadeDisponivel: livro.quantidadeDisponivel || "",
+    });
   };
 
-  const excluirLivro = (id) => {
-    const confirmar = confirm("Deseja realmente excluir este livro?");
+  const excluirLivro = async (id) => {
+    if (!window.confirm("Deseja realmente excluir este livro?")) return;
 
-    if (confirmar) {
-      setLivros(livros.filter((livro) => livro.id !== id));
+    try {
+      await api.delete(`/livros/${id}`);
+
+      alert("Livro removido com sucesso!");
+
+      carregarLivros();
+    } catch (erro) {
+      console.log(erro);
+      alert("Erro ao excluir livro.");
     }
   };
 
@@ -87,10 +122,9 @@ function Livros() {
     const termo = busca.toLowerCase();
 
     return (
-      livro.titulo.toLowerCase().includes(termo) ||
-      livro.autor.toLowerCase().includes(termo) ||
-      livro.categoria.toLowerCase().includes(termo) ||
-      livro.status.toLowerCase().includes(termo)
+      livro.titulo?.toLowerCase().includes(termo) ||
+      livro.autor?.toLowerCase().includes(termo) ||
+      livro.categoria?.toLowerCase().includes(termo)
     );
   });
 
@@ -99,14 +133,16 @@ function Livros() {
       <div className="page-header">
         <p className="page-kicker">Gerenciamento</p>
         <h1>Livros</h1>
-        <span>Cadastre, edite, exclua e busque livros do acervo.</span>
+        <span>Cadastre, edite, exclua e consulte os livros.</span>
       </div>
 
       <div className="crud-card">
         <div className="crud-card-header">
           <div>
-            <h2>{editandoId ? "Editar Livro" : "Cadastrar Livro"}</h2>
-            <p>Preencha os dados principais do livro.</p>
+            <h2>
+              {editandoId ? "Editar Livro" : "Cadastrar Livro"}
+            </h2>
+            <p>Preencha os dados do livro.</p>
           </div>
         </div>
 
@@ -116,6 +152,7 @@ function Livros() {
             placeholder="Título"
             value={form.titulo}
             onChange={alterarCampo}
+            required
           />
 
           <input
@@ -123,6 +160,7 @@ function Livros() {
             placeholder="Autor"
             value={form.autor}
             onChange={alterarCampo}
+            required
           />
 
           <input
@@ -133,8 +171,9 @@ function Livros() {
           />
 
           <input
+            type="number"
             name="anoPublicacao"
-            placeholder="Ano de publicação"
+            placeholder="Ano"
             value={form.anoPublicacao}
             onChange={alterarCampo}
           />
@@ -151,34 +190,38 @@ function Livros() {
             placeholder="ISBN"
             value={form.isbn}
             onChange={alterarCampo}
+            required
           />
 
           <input
+            type="number"
             name="quantidadeTotal"
-            placeholder="Quantidade total"
+            placeholder="Quantidade Total"
             value={form.quantidadeTotal}
             onChange={alterarCampo}
           />
 
           <input
+            type="number"
             name="quantidadeDisponivel"
-            placeholder="Quantidade disponível"
+            placeholder="Quantidade Disponível"
             value={form.quantidadeDisponivel}
             onChange={alterarCampo}
           />
 
-          <select name="status" value={form.status} onChange={alterarCampo}>
-            <option value="Disponível">Disponível</option>
-            <option value="Indisponível">Indisponível</option>
-          </select>
-
           <div className="crud-actions">
             <button type="submit">
-              {editandoId ? "Salvar alterações" : "Cadastrar livro"}
+              {editandoId
+                ? "Salvar alterações"
+                : "Cadastrar Livro"}
             </button>
 
             {editandoId && (
-              <button type="button" className="btn-secondary" onClick={limparFormulario}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={limparFormulario}
+              >
                 Cancelar
               </button>
             )}
@@ -190,13 +233,14 @@ function Livros() {
         <div className="crud-card-header">
           <div>
             <h2>Lista de Livros</h2>
-            <p>Consulte os livros cadastrados no sistema.</p>
+            <p>Livros cadastrados no sistema.</p>
           </div>
 
           <div className="search-box">
             <FaSearch />
+
             <input
-              placeholder="Buscar por título, autor, categoria ou status"
+              placeholder="Buscar livro..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
@@ -211,8 +255,8 @@ function Livros() {
                 <th>Autor</th>
                 <th>Categoria</th>
                 <th>ISBN</th>
+                <th>Total</th>
                 <th>Disponível</th>
-                <th>Status</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -231,17 +275,20 @@ function Livros() {
                     <td>{livro.autor}</td>
                     <td>{livro.categoria}</td>
                     <td>{livro.isbn}</td>
+                    <td>{livro.quantidadeTotal}</td>
                     <td>{livro.quantidadeDisponivel}</td>
-                    <td>
-                      <span className="status-badge">{livro.status}</span>
-                    </td>
+
                     <td>
                       <div className="table-actions">
-                        <button onClick={() => editarLivro(livro)}>
+                        <button
+                          onClick={() => editarLivro(livro)}
+                        >
                           <FaEdit />
                         </button>
 
-                        <button onClick={() => excluirLivro(livro.id)}>
+                        <button
+                          onClick={() => excluirLivro(livro.id)}
+                        >
                           <FaTrash />
                         </button>
                       </div>

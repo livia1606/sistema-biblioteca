@@ -30,5 +30,10 @@ module.exports = (sequelize) => {
     endereco: {
       type: DataTypes.STRING,
     },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "Ativo",
+    },
   });
 };
