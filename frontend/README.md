@@ -242,17 +242,7 @@ Link:
 
 ---
 
-# Observações
 
-Antes da entrega:
-
-- Remover a pasta `node_modules`;
-- Incluir o arquivo `.env.example` (opcional);
-- Incluir os scripts de criação do banco de dados;
-- Compactar o projeto em um único arquivo `.zip`;
-- Conferir se o sistema executa corretamente seguindo apenas este README.
-
----
 
 ## Universidade Tecnológica Federal do Paraná
 
