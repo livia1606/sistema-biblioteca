@@ -54,16 +54,15 @@ router.get(
  *             properties:
  *               nome:
  *                 type: string
- *                 example: João Silva
  *               email:
  *                 type: string
- *                 example: joao@email.com
  *               senha:
  *                 type: string
- *                 example: 123456
  *               perfil:
  *                 type: string
- *                 example: BIBLIOTECARIO
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso
  */
 router.post(
   "/",
