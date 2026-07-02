@@ -1,15 +1,32 @@
-require("dotenv").config();
+const sequelize = require("../config/database");
 
-const { Sequelize } = require("sequelize");
+const User = require("./User")(sequelize);
+const Book = require("./Book")(sequelize);
+const Reader = require("./Reader")(sequelize);
+const Loan = require("./Loan")(sequelize);
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-        host: process.env.DB_HOST,
-        dialect: "mysql"
-    }
-);
+// Relacionamentos
 
-module.exports = sequelize;
+Reader.hasMany(Loan, {
+  foreignKey: "readerId",
+});
+
+Loan.belongsTo(Reader, {
+  foreignKey: "readerId",
+});
+
+Book.hasMany(Loan, {
+  foreignKey: "bookId",
+});
+
+Loan.belongsTo(Book, {
+  foreignKey: "bookId",
+});
+
+module.exports = {
+  sequelize,
+  User,
+  Book,
+  Reader,
+  Loan,
+};
