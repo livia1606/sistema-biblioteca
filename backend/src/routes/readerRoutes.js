@@ -8,7 +8,8 @@ const {
   listarLeitores,
   cadastrarLeitor,
   editarLeitor,
-  excluirLeitor
+  excluirLeitor,
+  historicoEmprestimosLeitor
 } = require("../controllers/readerController");
 
 /**
@@ -100,6 +101,31 @@ router.delete(
   autenticarToken,
   permitirPerfis("ADMIN"),
   excluirLeitor
+);
+
+/**
+ * @swagger
+ * /api/leitores/{id}/emprestimos:
+ *   get:
+ *     summary: Histórico de empréstimos do leitor
+ *     tags: [Leitores]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Histórico retornado com sucesso
+ */
+router.get(
+  "/:id/emprestimos",
+  autenticarToken,
+  permitirPerfis("ADMIN", "BIBLIOTECARIO"),
+  historicoEmprestimosLeitor
 );
 
 module.exports = router;

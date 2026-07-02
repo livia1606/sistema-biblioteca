@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Livros from "./pages/Livros";
 import Leitores from "./pages/Leitores";
 import Emprestimos from "./pages/Emprestimos";
+import Usuarios from "./pages/Usuarios";
 
 import Navbar from "./components/Navbar";
 
@@ -15,6 +16,7 @@ function App() {
   const sair = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
+    localStorage.removeItem("perfil");
     setLogado(false);
   };
 
@@ -32,12 +34,10 @@ function App() {
 
       <main className="conteudo">
         {paginaAtual === "dashboard" && <Dashboard />}
-
         {paginaAtual === "livros" && <Livros />}
-
         {paginaAtual === "leitores" && <Leitores />}
-
         {paginaAtual === "emprestimos" && <Emprestimos />}
+        {paginaAtual === "usuarios" && <Usuarios />}
       </main>
     </div>
   );

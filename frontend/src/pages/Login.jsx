@@ -17,6 +17,7 @@ function Login({ setLogado }) {
 
       localStorage.setItem("token", resposta.data.token);
       localStorage.setItem("usuario", JSON.stringify(resposta.data.usuario));
+      localStorage.setItem("perfil", resposta.data.usuario.perfil);
 
       setLogado(true);
 

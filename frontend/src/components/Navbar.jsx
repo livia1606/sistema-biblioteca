@@ -5,9 +5,12 @@ import {
   FaUsers,
   FaExchangeAlt,
   FaSignOutAlt,
+  FaUserCog,
 } from "react-icons/fa";
 
 function Navbar({ paginaAtual, setPaginaAtual, sair }) {
+  const perfil = localStorage.getItem("perfil");
+
   return (
     <aside className="navbar">
       <div className="navbar-brand">
@@ -30,29 +33,45 @@ function Navbar({ paginaAtual, setPaginaAtual, sair }) {
           Dashboard
         </button>
 
-        <button
-          className={paginaAtual === "livros" ? "active" : ""}
-          onClick={() => setPaginaAtual("livros")}
-        >
-          <FaBook />
-          Livros
-        </button>
+        {(perfil === "ADMIN" || perfil === "BIBLIOTECARIO" || perfil === "LEITOR") && (
+          <button
+            className={paginaAtual === "livros" ? "active" : ""}
+            onClick={() => setPaginaAtual("livros")}
+          >
+            <FaBook />
+            Livros
+          </button>
+        )}
 
-        <button
-          className={paginaAtual === "leitores" ? "active" : ""}
-          onClick={() => setPaginaAtual("leitores")}
-        >
-          <FaUsers />
-          Leitores
-        </button>
+        {(perfil === "ADMIN" || perfil === "BIBLIOTECARIO") && (
+          <>
+            <button
+              className={paginaAtual === "leitores" ? "active" : ""}
+              onClick={() => setPaginaAtual("leitores")}
+            >
+              <FaUsers />
+              Leitores
+            </button>
 
-        <button
-          className={paginaAtual === "emprestimos" ? "active" : ""}
-          onClick={() => setPaginaAtual("emprestimos")}
-        >
-          <FaExchangeAlt />
-          Empréstimos
-        </button>
+            <button
+              className={paginaAtual === "emprestimos" ? "active" : ""}
+              onClick={() => setPaginaAtual("emprestimos")}
+            >
+              <FaExchangeAlt />
+              Empréstimos
+            </button>
+          </>
+        )}
+
+        {perfil === "ADMIN" && (
+          <button
+            className={paginaAtual === "usuarios" ? "active" : ""}
+            onClick={() => setPaginaAtual("usuarios")}
+          >
+            <FaUserCog />
+            Usuários
+          </button>
+        )}
       </nav>
 
       <button className="navbar-logout" onClick={sair}>

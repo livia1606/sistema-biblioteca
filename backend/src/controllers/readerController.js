@@ -1,4 +1,4 @@
-const { Reader } = require("../models");
+const { Reader, Loan, Book } = require("../models");
 
 // Listar todos os leitores
 const listarLeitores = async (req, res) => {
@@ -76,9 +76,44 @@ const excluirLeitor = async (req, res) => {
   }
 };
 
+// Histórico de empréstimos de um leitor
+const historicoEmprestimosLeitor = async (req, res) => {
+  try {
+    const leitor = await Reader.findByPk(req.params.id);
+
+    if (!leitor) {
+      return res.status(404).json({
+        mensagem: "Leitor não encontrado.",
+      });
+    }
+
+    const emprestimos = await Loan.findAll({
+      where: {
+        readerId: req.params.id,
+      },
+      include: [
+        {
+          model: Book,
+        },
+      ],
+      order: [["dataEmprestimo", "DESC"]],
+    });
+
+    res.status(200).json({
+      leitor,
+      emprestimos,
+    });
+  } catch (error) {
+    res.status(500).json({
+      erro: error.message,
+    });
+  }
+};
+
 module.exports = {
   listarLeitores,
   cadastrarLeitor,
   editarLeitor,
   excluirLeitor,
+  historicoEmprestimosLeitor,
 };
