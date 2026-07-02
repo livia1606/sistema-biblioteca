@@ -7,7 +7,7 @@ const permitirPerfis = require("../middleware/permissaoMiddleware");
 const {
   listarEmprestimos,
   registrarEmprestimo,
-  registrarDevolucao
+  registrarDevolucao,
 } = require("../controllers/loanController");
 
 /**
@@ -25,6 +25,9 @@ const {
  *     tags: [Empréstimos]
  *     security:
  *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de empréstimos
  */
 router.get(
   "/",
@@ -41,6 +44,35 @@ router.get(
  *     tags: [Empréstimos]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - dataEmprestimo
+ *               - dataPrevistaDevolucao
+ *               - bookId
+ *               - readerId
+ *             properties:
+ *               dataEmprestimo:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-07-02"
+ *               dataPrevistaDevolucao:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-07-09"
+ *               bookId:
+ *                 type: integer
+ *                 example: 1
+ *               readerId:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Empréstimo registrado com sucesso
  */
 router.post(
   "/",
@@ -57,6 +89,16 @@ router.post(
  *     tags: [Empréstimos]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do empréstimo
+ *     responses:
+ *       200:
+ *         description: Devolução registrada com sucesso
  */
 router.put(
   "/:id/devolucao",

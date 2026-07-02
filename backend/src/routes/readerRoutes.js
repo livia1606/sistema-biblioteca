@@ -38,6 +38,34 @@ router.get(
  *   post:
  *     summary: Cadastrar leitor
  *     tags: [Leitores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *               - email
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: João Miguel
+ *               email:
+ *                 type: string
+ *                 example: joao@email.com
+ *               telefone:
+ *                 type: string
+ *                 example: (11) 99999-9999
+ *               cpf:
+ *                 type: string
+ *                 example: 12345678900
+ *               endereco:
+ *                 type: string
+ *                 example: Rua das Flores, 100
+ *     responses:
+ *       201:
+ *         description: Leitor cadastrado com sucesso
  */
 router.post(
   "/",
