@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 
+
+const { sequelize } = require("./models");
+
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const readerRoutes = require("./routes/readerRoutes");
@@ -29,5 +32,14 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec)
 );
+
+sequelize
+  .sync()
+  .then(() => {
+    console.log("Banco sincronizado com sucesso!");
+  })
+  .catch((err) => {
+    console.error("Erro ao sincronizar o banco:", err);
+  });
 
 module.exports = app;

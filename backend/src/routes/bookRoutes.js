@@ -38,7 +38,34 @@ router.get(
  *   post:
  *     summary: Cadastrar livro
  *     tags: [Livros]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *               autor:
+ *                 type: string
+ *               editora:
+ *                 type: string
+ *               categoria:
+ *                 type: string
+ *               isbn:
+ *                 type: string
+ *               anoPublicacao:
+ *                 type: integer
+ *               quantidadeTotal:
+ *                 type: integer
+ *               quantidadeDisponivel:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Livro cadastrado com sucesso
  */
+
 router.post(
   "/",
   autenticarToken,

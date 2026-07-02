@@ -1,15 +1,27 @@
-// Controller de Livros
+const { Book } = require("../models");
 
-const listarLivros = (req, res) => {
-    res.status(200).json({
-        mensagem: "Listando todos os livros"
+const listarLivros = async (req, res) => {
+  try {
+    const livros = await Book.findAll();
+
+    res.status(200).json(livros);
+  } catch (error) {
+    res.status(500).json({
+      erro: error.message,
     });
+  }
 };
 
-const cadastrarLivro = (req, res) => {
-    res.status(201).json({
-        mensagem: "Livro cadastrado com sucesso"
+const cadastrarLivro = async (req, res) => {
+  try {
+    const livro = await Book.create(req.body);
+
+    res.status(201).json(livro);
+  } catch (error) {
+    res.status(500).json({
+      erro: error.message,
     });
+  }
 };
 
 const editarLivro = (req, res) => {
