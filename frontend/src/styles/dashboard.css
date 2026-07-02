@@ -1,0 +1,109 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.dashboard-main-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(199, 167, 108, 0.25);
+  border-radius: 34px;
+  box-shadow: 0 22px 55px rgba(63, 45, 28, 0.12);
+  padding: 55px;
+}
+
+.dashboard-text {
+  width: 100%;
+  max-width: 980px;
+}
+
+.page-kicker {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-weight: 600;
+}
+
+.dashboard-text h1 {
+  font-family: "Cormorant Garamond", serif;
+  color: var(--green);
+  font-size: 76px;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.dashboard-description {
+  color: var(--text);
+  max-width: 850px;
+  line-height: 1.8;
+  margin: 22px 0;
+}
+
+.dashboard-info {
+  background: #f4ebdc;
+  border: 1px solid rgba(199, 167, 108, 0.25);
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 22px;
+}
+
+.dashboard-info strong {
+  color: var(--green);
+  font-size: 18px;
+}
+
+.dashboard-info span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dashboard-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--brown);
+  font-weight: 500;
+  margin: 0;
+}
+
+.dashboard-shortcuts {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(199, 167, 108, 0.25);
+  border-radius: 30px;
+  box-shadow: 0 20px 45px rgba(63, 45, 28, 0.1);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+}
+
+.dashboard-shortcuts article {
+  padding: 26px;
+  border-right: 1px solid rgba(199, 167, 108, 0.22);
+}
+
+.dashboard-shortcuts article:last-child {
+  border-right: none;
+}
+
+.dashboard-shortcuts svg {
+  color: var(--brown);
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+
+.dashboard-shortcuts h3 {
+  font-family: "Cormorant Garamond", serif;
+  color: var(--green);
+  font-size: 28px;
+  margin: 0;
+}
+
+.dashboard-shortcuts p {
+  color: var(--muted);
+  margin: 6px 0 0;
+}

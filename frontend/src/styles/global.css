@@ -1,0 +1,29 @@
+:root {
+  --bg: #f8f2e8;
+  --card: rgba(255, 255, 255, 0.82);
+  --green: #2e3d32;
+  --brown: #7a4a24;
+  --brown-dark: #4b2a13;
+  --gold: #b98a4a;
+  --text: #43392f;
+  --muted: #7c7168;
+  --border: rgba(185, 138, 74, 0.28);
+
+  font-family: "Poppins", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font-family: inherit;
+}
