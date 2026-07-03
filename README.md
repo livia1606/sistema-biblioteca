@@ -222,7 +222,7 @@ Administrador
 
 ```
 E-mail:
-admin@biblioteca.com
+admin@email.com
 
 Senha:
 123456
