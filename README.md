@@ -236,9 +236,7 @@ Senha:
 
 Link:
 
-```
-(Adicionar o link do vídeo após a gravação)
-```
+(https://drive.google.com/file/d/1Fpw6up4ojWy4qY7JjYlzFp8GpBTyiYYf/view?usp=sharing)
 
 ---
 
